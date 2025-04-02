@@ -1,24 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { useProfileStore } from './useProfileStore'
-import { ProfileFieldKey } from './useProfileStore'
 import { TagInput } from './TagInput'
+import { useProfileStore, ProfileData, ProfileFieldKey } from './useProfileStore'
 
 const skillLevels = ['Beginner', 'Intermediate', 'Expert', 'Explorer']
 const tagInputStyle = "bg-black border border-gray-600 p-2 rounded w-full text-white"
 
 export default function SkillsStep({ onNext }: { onNext: () => void }) {
   const { profile, setField } = useProfileStore()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  const handleChange = (name: ProfileFieldKey, value: string[] | string) => {
-    setField(name, value as any)
+  const handleChange = <K extends ProfileFieldKey>(name: K, value: ProfileData[K]) => {
+    setField(name, value)
   }
 
-  const handleSubmit = async () => {
-    onNext() // saving handled at the final step
+  const handleSubmit = () => {
+    onNext() // saving handled in final step
   }
 
   return (
@@ -67,14 +63,11 @@ export default function SkillsStep({ onNext }: { onNext: () => void }) {
         </select>
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
-
       <button
         onClick={handleSubmit}
-        disabled={loading}
         className="bg-white text-black px-4 py-2 rounded mt-4"
       >
-        {loading ? 'Saving...' : 'Continue'}
+        Continue
       </button>
     </div>
   )

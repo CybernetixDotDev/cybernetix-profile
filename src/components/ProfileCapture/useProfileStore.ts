@@ -20,7 +20,10 @@ export type ProfileData = {
   preferred_collab: string
   hardware: string
   access_needs: string
+
+  
 }
+
 
 type ProfileStore = {
   profile: Partial<ProfileData>
