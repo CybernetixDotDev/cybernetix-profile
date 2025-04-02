@@ -34,7 +34,7 @@ export default function LoginPage() {
       .eq('id', loginData.user.id)
       .maybeSingle()
 
-    const redirectPath = searchParams.get('redirect') || (profile ? '/profile' : '/setup')
+    const redirectPath = redirectMessage || (profile ? '/profile' : '/setup')
     router.push(redirectPath)
     setLoading(false)
   }
