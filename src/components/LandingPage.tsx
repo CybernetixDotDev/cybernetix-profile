@@ -8,14 +8,25 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-white font-sans">
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center text-center px-6 pt-32 pb-24">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 bg-clip-text text-transparent"
-        >
-          ✦ Cybernetix
-        </motion.h1>
+      <div className="flex flex-col items-center gap-4">
+  <motion.img
+    src="/logo.png"
+    alt="Cybernetix Logo"
+    className="w-24 md:w-32"
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.8 }}
+  />
+
+  <motion.h1
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 1 }}
+    className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 bg-clip-text text-transparent"
+  >
+    ✦ Cybernetix
+  </motion.h1>
+</div>
 
         <motion.p
           initial={{ opacity: 0, y: 10 }}
