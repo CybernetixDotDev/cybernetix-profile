@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function LoginPage() {
@@ -10,7 +10,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
+  const redirectMessage = searchParams.get('redirect')
   const handleLogin = async () => {
     setLoading(true)
     setError(null)
@@ -26,19 +28,14 @@ export default function LoginPage() {
       return
     }
 
-    // Check if profile exists
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')
       .eq('id', loginData.user.id)
       .maybeSingle()
 
-    if (profile) {
-      router.push('/profile')
-    } else {
-      router.push('/setup')
-    }
-
+    const redirectPath = searchParams.get('redirect') || (profile ? '/profile' : '/setup')
+    router.push(redirectPath)
     setLoading(false)
   }
 
@@ -46,6 +43,12 @@ export default function LoginPage() {
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
       <div className="bg-zinc-900 p-6 rounded-xl w-full max-w-md space-y-4">
         <h1 className="text-3xl font-bold text-center">Log In</h1>
+
+        {redirectMessage && (
+          <p className="text-yellow-400 text-sm text-center border border-yellow-500 p-2 rounded">
+            You must log in to access: <code className="text-white">{redirectMessage}</code>
+          </p>
+        )}
 
         <input
           type="email"
