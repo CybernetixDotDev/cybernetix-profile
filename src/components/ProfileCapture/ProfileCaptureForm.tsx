@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import IdentityStep from './IdentityStep'
+import IdentityStep from '../IdentityStep'
 import SkillsStep from './SkillsStep'
 import CosmicStep from './CosmicStep'
 import AvailabilityStep from './AvailabilityStep'

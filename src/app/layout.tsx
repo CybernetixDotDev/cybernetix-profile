@@ -1,17 +1,25 @@
 import './globals.css'
-import Navbar from '@/components/Navbar'
+import type { Metadata } from 'next'
+import AuthProvider from '@/components/SessionProvider'
+import Navbar from '@/components/Navbar' // ⬅️ Add this
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Cybernetix',
-  description: 'Unlock your cosmic potential.',
+  description: 'Empower your cosmic purpose',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body className="bg-black text-white">
-        <Navbar />
-        <main>{children}</main>
+      <body>
+        <AuthProvider>
+          <Navbar /> {/* ⬅️ Add this */}
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

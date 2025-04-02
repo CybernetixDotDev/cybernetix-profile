@@ -22,6 +22,8 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "middleware.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "middleware.js", "types/next-auth.d.ts"],
   "exclude": ["node_modules"]
+
+  
 }
