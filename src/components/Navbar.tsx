@@ -5,10 +5,16 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { Session } from '@supabase/supabase-js'
+
+type UserProfile = {
+  full_name: string | null
+  profile_picture: string | null
+}
 
 export default function Navbar() {
-  const [session, setSession] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const [session, setSession] = useState<Session | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const router = useRouter()
 
   useEffect(() => {
