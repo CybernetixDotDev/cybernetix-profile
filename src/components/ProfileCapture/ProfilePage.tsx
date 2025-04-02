@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import type { ProfileData } from './useProfileStore'
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<any>(null)
+  const [profile, setProfile] = useState<Partial<ProfileData> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -64,7 +65,7 @@ export default function ProfilePage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-2">Skills & Interests</h2>
-          <p><strong>Tech:</strong> {profile.technical_skills?.join(', ') || '—'}</p>
+          <p><strong>Tech:</strong> {profile.skills?.join(', ') || '—'}</p>
           <p><strong>Soft:</strong> {profile.soft_skills?.join(', ') || '—'}</p>
           <p><strong>Interests:</strong> {profile.interests?.join(', ') || '—'}</p>
           <p><strong>Willing to Learn:</strong> {profile.willing_to_learn?.join(', ') || '—'}</p>
@@ -73,7 +74,7 @@ export default function ProfilePage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-2">Cosmic Alignment</h2>
-          <p><strong>Archetype:</strong> {profile.cosmic_archetype}</p>
+          <p><strong>Archetype:</strong> {profile.archetype}</p>
           <p><strong>Values:</strong> {profile.values?.join(', ') || '—'}</p>
           {profile.mantra && (
             <blockquote className="italic text-yellow-400 mt-2 border-l-4 border-yellow-400 pl-4">
