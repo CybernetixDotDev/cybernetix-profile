@@ -4,32 +4,28 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { v4 as uuidv4 } from 'uuid'
 import { slugifyUsername } from '@/utils/slugify'
+import { useProfileStore } from './useProfileStore'
 
 const BASE_S3_URL = 'https://tzuzzjxocpuintdjxjqr.supabase.co/storage/v1/object/public/avatars'
 
 export default function IdentityStep({ onNext }: { onNext: () => void }) {
-  const [form, setForm] = useState({
-    full_name: '',
-    username: '',
-    profile_picture: '',
-    email: '',
-    location: '',
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || ''
-  })
+  const { profile, setField } = useProfileStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) setForm((prev) => ({ ...prev, email: user.email || '' }))
+      if (user) {
+        setField('email', user.email || '')
+      }
     }
     fetchUser()
-  }, [])
+  }, [setField])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setForm({ ...form, [name]: name === 'username' ? slugifyUsername(value) : value })
+    setField(name as keyof typeof profile, name === 'username' ? slugifyUsername(value) : value)
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +33,6 @@ export default function IdentityStep({ onNext }: { onNext: () => void }) {
     if (!file) return
 
     const filePath = `avatars/${uuidv4()}-${file.name}`
-
     const { error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(filePath, file)
@@ -46,7 +41,7 @@ export default function IdentityStep({ onNext }: { onNext: () => void }) {
       setError(uploadError.message)
     } else {
       const imageUrl = `${BASE_S3_URL}/${filePath.replace('avatars/', '')}`
-      setForm({ ...form, profile_picture: imageUrl })
+      setField('profile_picture', imageUrl)
     }
   }
 
@@ -55,11 +50,15 @@ export default function IdentityStep({ onNext }: { onNext: () => void }) {
     setError(null)
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return setError('User not found')
+    if (!user) {
+      setError('User not found')
+      setLoading(false)
+      return
+    }
 
     const { error: upsertError } = await supabase.from('profiles').upsert({
       id: user.id,
-      ...form
+      ...profile
     })
 
     if (upsertError) {
@@ -67,6 +66,7 @@ export default function IdentityStep({ onNext }: { onNext: () => void }) {
     } else {
       onNext()
     }
+
     setLoading(false)
   }
 
@@ -78,7 +78,7 @@ export default function IdentityStep({ onNext }: { onNext: () => void }) {
         type="text"
         name="full_name"
         placeholder="Full Name"
-        value={form.full_name}
+        value={profile.full_name || ''}
         onChange={handleChange}
         className="w-full p-2 bg-black border border-gray-600 rounded"
       />
@@ -87,7 +87,7 @@ export default function IdentityStep({ onNext }: { onNext: () => void }) {
         type="text"
         name="username"
         placeholder="Unique Username"
-        value={form.username}
+        value={profile.username || ''}
         onChange={handleChange}
         className="w-full p-2 bg-black border border-gray-600 rounded"
       />
@@ -96,14 +96,14 @@ export default function IdentityStep({ onNext }: { onNext: () => void }) {
         type="text"
         name="location"
         placeholder="Location (optional)"
-        value={form.location}
+        value={profile.location || ''}
         onChange={handleChange}
         className="w-full p-2 bg-black border border-gray-600 rounded"
       />
 
       <select
         name="timezone"
-        value={form.timezone}
+        value={profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone}
         onChange={handleChange}
         className="w-full p-2 bg-black border border-gray-600 rounded"
       >
@@ -115,8 +115,8 @@ export default function IdentityStep({ onNext }: { onNext: () => void }) {
       <div>
         <label className="block mb-1">Profile Picture (optional)</label>
         <input type="file" accept="image/*" onChange={handleImageUpload} />
-        {form.profile_picture && (
-          <img src={form.profile_picture} alt="Profile" className="w-24 h-24 mt-2 rounded-full" />
+        {profile.profile_picture && (
+          <img src={profile.profile_picture} alt="Profile" className="w-24 h-24 mt-2 rounded-full" />
         )}
       </div>
 

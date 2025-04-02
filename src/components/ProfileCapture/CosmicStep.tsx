@@ -1,28 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { useProfileStore, ProfileFieldKey } from './useProfileStore'
 
 const archetypes = [
-  "Alchemist",
-  "Architect",
-  "Oracle",
-  "Disruptor",
-  "Navigator",
-  "Visionary",
-  "Engineer",
-  "Seer",
-  "Cosmic Gardener"
+  "Alchemist", "Architect", "Oracle", "Disruptor",
+  "Navigator", "Visionary", "Engineer", "Seer", "Cosmic Gardener"
 ]
 
 const tagInputStyle = "bg-black border border-gray-600 p-2 rounded w-full text-white"
 
-function TagInput({ label, name, value, onChange }: {
-  label: string,
-  name: string,
-  value: string[],
-  onChange: (name: string, value: string[]) => void
-}) {
+type TagInputProps = {
+  label: string
+  name: ProfileFieldKey
+  value: string[]
+  onChange: (name: ProfileFieldKey, value: string[]) => void
+}
+
+function TagInput({ label, name, value, onChange }: TagInputProps) {
   const [input, setInput] = useState('')
 
   const handleAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -63,43 +58,19 @@ function TagInput({ label, name, value, onChange }: {
   )
 }
 
+// ✅ ADD THIS COMPONENT EXPORT!
 export default function CosmicStep({ onNext }: { onNext: () => void }) {
-  const [form, setForm] = useState({
-    cosmic_archetype: archetypes[0],
-    values: [] as string[],
-    mantra: '',
-    bio: ''
-  })
+  const { profile, setField } = useProfileStore()
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target
-    setForm({ ...form, [name]: value })
+    setField(name as ProfileFieldKey, value)
   }
 
-  const handleTagChange = (name: string, value: string[]) => {
-    setForm({ ...form, [name]: value })
-  }
-
-  const handleSubmit = async () => {
-    setLoading(true)
-    setError(null)
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return setError('User not found')
-
-    const { error: upsertError } = await supabase.from('profiles').update({
-      ...form
-    }).eq('id', user.id)
-
-    if (upsertError) {
-      setError(upsertError.message)
-    } else {
-      onNext()
-    }
-    setLoading(false)
+  const handleTagChange = (name: ProfileFieldKey, value: string[]) => {
+    setField(name, value)
   }
 
   return (
@@ -109,8 +80,8 @@ export default function CosmicStep({ onNext }: { onNext: () => void }) {
       <div>
         <label className="block mb-1 text-white">Choose Your Archetype</label>
         <select
-          name="cosmic_archetype"
-          value={form.cosmic_archetype}
+          name="archetype"
+          value={profile.archetype || archetypes[0]}
           onChange={handleChange}
           className={tagInputStyle}
         >
@@ -123,7 +94,7 @@ export default function CosmicStep({ onNext }: { onNext: () => void }) {
       <TagInput
         label="Core Values (Press Enter to Add)"
         name="values"
-        value={form.values}
+        value={profile.values || []}
         onChange={handleTagChange}
       />
 
@@ -131,7 +102,7 @@ export default function CosmicStep({ onNext }: { onNext: () => void }) {
         <label className="block mb-1 text-white">Your Mantra (Optional)</label>
         <textarea
           name="mantra"
-          value={form.mantra}
+          value={profile.mantra || ''}
           onChange={handleChange}
           rows={2}
           placeholder="E.g. I build futures where none existed before."
@@ -143,7 +114,7 @@ export default function CosmicStep({ onNext }: { onNext: () => void }) {
         <label className="block mb-1 text-white">Your Cosmic Bio</label>
         <textarea
           name="bio"
-          value={form.bio}
+          value={profile.bio || ''}
           onChange={handleChange}
           rows={4}
           placeholder="Tell the world your origin story or cosmic mission…"
@@ -151,14 +122,11 @@ export default function CosmicStep({ onNext }: { onNext: () => void }) {
         />
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
-
       <button
-        onClick={handleSubmit}
-        disabled={loading}
+        onClick={onNext}
         className="bg-white text-black px-4 py-2 rounded mt-4"
       >
-        {loading ? 'Saving...' : 'Continue'}
+        Continue
       </button>
     </div>
   )
