@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useProfileStore, ProfileFieldKey } from './useProfileStore'
+import { useProfileStore, ProfileFieldKey } from '../useProfileStore'
 
 const archetypes = [
   "Alchemist", "Architect", "Oracle", "Disruptor",

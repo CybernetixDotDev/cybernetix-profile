@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import type { ProfileData } from './useProfileStore'
+import type { ProfileData } from '../useProfileStore'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Partial<ProfileData> | null>(null)

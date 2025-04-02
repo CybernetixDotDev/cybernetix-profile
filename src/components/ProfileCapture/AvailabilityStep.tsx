@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { useProfileStore } from './useProfileStore'
+import { useProfileStore } from '../useProfileStore'
 
 
 const collabOptions = ['Async', 'Real-Time', 'Solo', 'Pair Programming', 'Open to Anything']

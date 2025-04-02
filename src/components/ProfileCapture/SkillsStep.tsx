@@ -1,7 +1,7 @@
 'use client'
 
 import { TagInput } from './TagInput'
-import { useProfileStore, ProfileData, ProfileFieldKey } from './useProfileStore'
+import { useProfileStore, ProfileData, ProfileFieldKey } from '../useProfileStore'
 
 const skillLevels = ['Beginner', 'Intermediate', 'Expert', 'Explorer']
 const tagInputStyle = "bg-black border border-gray-600 p-2 rounded w-full text-white"
