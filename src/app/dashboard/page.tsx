@@ -1,52 +1,87 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { useProfileStore, ProfileData, ProfileFieldKey } from '@/components/onboarding/useProfileStore'
+import CosmicLoader from '@/components/ui/CosmicLoader'
+import ProfileCompleteness from '@/components/dashboard/ProfileCompleteness'
+import CompleteProfileModal from '@/components/dashboard/CompleteProfileModal'
+
+
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [checkingProfile, setCheckingProfile] = useState(true)
-
-  const checkProfile = useCallback(async () => {
-    if (!session?.user?.id) return
-
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', session.user.id)
-      .maybeSingle()
-
-    if (!profile || error) {
-      router.replace('/onboardingflow')
-    } else {
-      setCheckingProfile(false)
-    }
-  }, [session?.user?.id, router])
+  const { setField, profile } = useProfileStore()
+  const [loading, setLoading] = useState(true)
+  const [showCompleteModal, setShowCompleteModal] = useState(false)
 
   useEffect(() => {
-    if (status === 'loading') return
-    if (status === 'unauthenticated') router.replace('/signin')
-    if (status === 'authenticated') checkProfile()
-  }, [status, checkProfile, router])
+    const checkProfile = async () => {
+      if (!session?.user?.id) return
 
-  if (status === 'loading' || checkingProfile) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single()
+
+      if (!data) {
+        setShowCompleteModal(true)
+      } else {
+        Object.entries(data).forEach(([key, value]) => {
+          setField(key as ProfileFieldKey, value as ProfileData[ProfileFieldKey])
+        })
+        
+      }
+
+      setLoading(false)
+    }
+
+    if (status === 'authenticated') {
+      checkProfile()
+    } else if (status === 'unauthenticated') {
+      router.replace('/signin')
+    }
+  }, [status, session?.user?.id, router, setField])
+
+  const handleProfileSave = async () => {
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({ id: session?.user?.id, ...profile })
+
+    if (!error) {
+      setShowCompleteModal(false)
+    }
+  }
+
+  if (loading || status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-400 border-opacity-50"></div>
-          <p className="text-pink-300 font-light text-sm">Gathering your stardust...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <CosmicLoader />
       </div>
     )
   }
 
   return (
-    <div className="text-white p-6">
+    <div className="text-white p-6 space-y-6">
       <h1 className="text-3xl font-bold">Welcome back, {session?.user?.name} 👋</h1>
-      {/* You can display dashboard data here */}
+
+      <ProfileCompleteness
+  profile={profile}
+  onCompleteProfileClick={() => setShowCompleteModal(true)}
+/>
+
+      <CompleteProfileModal
+        isOpen={showCompleteModal}
+        onClose={() => setShowCompleteModal(false)}
+        initialProfile={profile}
+        onSave={handleProfileSave}
+      />
+
+      {/* Future dashboard widgets here */}
     </div>
   )
 }

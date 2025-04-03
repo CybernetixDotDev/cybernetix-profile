@@ -20,10 +20,7 @@ export type ProfileData = {
   preferred_collab: string
   hardware: string
   access_needs: string
-
-  
 }
-
 
 type ProfileStore = {
   profile: Partial<ProfileData>
@@ -45,3 +42,48 @@ export const useProfileStore = create<ProfileStore>((set) => ({
 
 // ✅ NEW – export this helper type for use in components
 export type ProfileFieldKey = keyof Partial<ProfileData>
+
+// ✅ Required fields for completeness check
+const REQUIRED_FIELDS: (keyof ProfileData)[] = [
+  'full_name',
+  'username',
+  'email',
+  'profile_picture',
+  'skills',
+  'experience_level',
+  'archetype',
+  'mantra',
+  'bio',
+]
+
+// ✅ Completeness checker function
+export function getProfileCompleteness(profile: Partial<ProfileData>) {
+  let filled = 0
+
+  for (const field of REQUIRED_FIELDS) {
+    const value = profile[field]
+
+    if (Array.isArray(value)) {
+      if (value.length > 0) filled++
+    } else if (typeof value === 'string') {
+      if (value.trim() !== '') filled++
+    } else if (value !== undefined && value !== null) {
+      filled++
+    }
+  }
+
+  const percent = Math.round((filled / REQUIRED_FIELDS.length) * 100)
+
+  return {
+    percent,
+    missingFields: REQUIRED_FIELDS.filter(field => {
+      const value = profile[field]
+      return (
+        value === undefined ||
+        value === null ||
+        (typeof value === 'string' && value.trim() === '') ||
+        (Array.isArray(value) && value.length === 0)
+      )
+    }),
+  }
+}
