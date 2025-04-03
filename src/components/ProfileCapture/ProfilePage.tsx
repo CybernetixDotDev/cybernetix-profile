@@ -1,24 +1,25 @@
+// components/ProfileCapture/ProfilePage.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { supabase } from '@/lib/supabaseClient'
-import type { ProfileData } from '../useProfileStore'
+import type { ProfileData } from '@/components/onboarding/useProfileStore'
+import CosmicLoader from '../ui/CosmicLoader' // (optional cute loader if you have it)
 
 export default function ProfilePage() {
+  const { data: session, status } = useSession()
   const [profile, setProfile] = useState<Partial<ProfileData> | null>(null)
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchProfile = async () => {
-      setLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return setError('User not found')
+      if (!session?.user?.id) return
 
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', session.user.id)
         .single()
 
       if (error) {
@@ -26,21 +27,28 @@ export default function ProfilePage() {
       } else {
         setProfile(data)
       }
-
-      setLoading(false)
     }
 
-    fetchProfile()
-  }, [])
+    if (status === 'authenticated') {
+      fetchProfile()
+    }
+  }, [session?.user?.id, status])
 
-  if (loading) return <p className="text-white text-center">Loading profile...</p>
-  if (error) return <p className="text-red-500 text-center">{error}</p>
-  if (!profile) return null
+  if (status === 'loading' || !profile) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <CosmicLoader /> {/* Swap with a spinner or shimmer if needed */}
+      </div>
+    )
+  }
+
+  if (error) {
+    return <p className="text-red-400 text-center mt-10">⚠ {error}</p>
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-4xl mx-auto bg-zinc-900 p-6 rounded-2xl shadow-lg space-y-6">
-
         <div className="flex items-center gap-4">
           {profile.profile_picture && (
             <img
@@ -59,17 +67,11 @@ export default function ProfilePage() {
         <hr className="border-gray-700" />
 
         <section>
-          <h2 className="text-xl font-semibold mb-2">Location & Timezone</h2>
-          <p>{profile.location || '—'} | {profile.timezone || '—'}</p>
-        </section>
-
-        <section>
           <h2 className="text-xl font-semibold mb-2">Skills & Interests</h2>
           <p><strong>Tech:</strong> {profile.skills?.join(', ') || '—'}</p>
           <p><strong>Soft:</strong> {profile.soft_skills?.join(', ') || '—'}</p>
           <p><strong>Interests:</strong> {profile.interests?.join(', ') || '—'}</p>
           <p><strong>Willing to Learn:</strong> {profile.willing_to_learn?.join(', ') || '—'}</p>
-          <p><strong>Experience:</strong> {profile.experience_level}</p>
         </section>
 
         <section>
@@ -85,7 +87,7 @@ export default function ProfilePage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold mb-2">Availability & Access</h2>
+          <h2 className="text-xl font-semibold mb-2">Access & Availability</h2>
           <p><strong>Availability:</strong> {profile.availability}</p>
           <p><strong>Collab Style:</strong> {profile.preferred_collab}</p>
           <p><strong>Hardware:</strong> {profile.hardware}</p>

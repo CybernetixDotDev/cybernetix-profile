@@ -22,14 +22,14 @@ export default function SignInPage() {
 
         <div className="space-y-4">
           <button
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+            onClick={() => signIn("google")}
             className="w-full py-2 px-4 bg-white text-black rounded-md hover:bg-gray-100 transition"
           >
             Continue with Google
           </button>
 
           <button
-            onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+            onClick={() => signIn("github")}
             className="w-full py-2 px-4 bg-black text-white border border-white rounded-md hover:bg-zinc-800 transition"
           >
             Continue with GitHub

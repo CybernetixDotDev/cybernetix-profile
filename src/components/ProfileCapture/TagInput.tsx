@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ProfileFieldKey } from '../useProfileStore' // adjust path if needed
+import { ProfileFieldKey } from '../onboarding/useProfileStore' // adjust path if needed
 
 const tagInputStyle = "bg-black border border-gray-600 p-2 rounded w-full text-white"
 
